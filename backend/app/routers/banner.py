@@ -6,7 +6,7 @@
 """
 import base64
 import io
-from typing import List
+from typing import List, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
@@ -23,6 +23,26 @@ job_store: dict[str, BannerJobResponse] = {}
 
 # 제품 이미지 최대 업로드 수
 MAX_PRODUCT_IMAGES = 3
+
+# 파일 크기 제한 (10 MB)
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+
+# 허용 다운로드 포맷
+ALLOWED_FORMATS: set[str] = {"png", "jpg", "jpeg"}
+
+
+def _validate_image_upload(file_bytes: bytes, filename: str, content_type: str | None) -> None:
+    """업로드 이미지 크기 및 MIME 타입 검증."""
+    if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"'{filename}' 파일 크기가 10MB를 초과합니다.",
+        )
+    if content_type and not content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"'{filename}'은 이미지 파일이 아닙니다. (content_type: {content_type})",
+        )
 
 
 @router.post("/banner/generate", response_model=BannerJobResponse)
@@ -50,6 +70,11 @@ async def generate_banner(
     # 파일 내용을 bytes로 읽기 (UploadFile은 비동기 read 지원)
     reference_bytes = await reference_image.read()
     product_bytes_list = [await img.read() for img in product_images]
+
+    # 파일 크기 및 MIME 타입 검증
+    _validate_image_upload(reference_bytes, reference_image.filename or "reference", reference_image.content_type)
+    for i, (img, img_bytes) in enumerate(zip(product_images, product_bytes_list)):
+        _validate_image_upload(img_bytes, img.filename or f"product_{i+1}", img.content_type)
 
     # 텍스트 데이터 dict 구성
     text_data = {
@@ -96,8 +121,16 @@ async def download_banner(
 ) -> StreamingResponse:
     """
     완료된 배너 작업에서 특정 variant를 이미지 파일로 다운로드한다.
-    - format 쿼리 파라미터: "png" (기본값) — 추후 "jpeg" 등 확장 가능
+    - format 쿼리 파라미터: "png" | "jpg" (기본값: "png")
     """
+    # format 파라미터 whitelist 검증
+    fmt = format.lower()
+    if fmt not in ALLOWED_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"지원하지 않는 포맷입니다: '{format}'. 허용: {sorted(ALLOWED_FORMATS)}",
+        )
+
     job = job_store.get(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail=f"job_id '{job_id}'를 찾을 수 없습니다.")
@@ -121,14 +154,22 @@ async def download_banner(
             detail=f"variant_id '{variant_id}'를 찾을 수 없습니다.",
         )
 
+    # 빈 image_base64 방어
+    if not variant.image_base64:
+        raise HTTPException(
+            status_code=404,
+            detail=f"variant '{variant_id}' 이미지가 생성되지 않았습니다.",
+        )
+
     # base64 디코딩 후 StreamingResponse로 반환
     image_bytes = base64.b64decode(variant.image_base64)
-    media_type = "image/png" if format.lower() == "png" else f"image/{format.lower()}"
+    media_type = "image/jpeg" if fmt in ("jpg", "jpeg") else "image/png"
+    ext = "jpg" if fmt in ("jpg", "jpeg") else "png"
 
     return StreamingResponse(
         content=io.BytesIO(image_bytes),
         media_type=media_type,
         headers={
-            "Content-Disposition": f'attachment; filename="banner_{variant_id}.{format}"'
+            "Content-Disposition": f'attachment; filename="banner_{variant_id}.{ext}"'
         },
     )

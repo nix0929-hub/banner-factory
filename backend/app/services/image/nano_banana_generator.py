@@ -219,14 +219,18 @@ async def generate_banner_variants(
                 logger.debug("제품 이미지 %d 첨부 (크기: %d bytes)", i + 1, len(img_bytes))
 
             # Gemini 이미지 생성 API 호출 (동기 → asyncio.to_thread로 이벤트 루프 블로킹 방지)
+            # asyncio.wait_for로 60초 타임아웃 설정 (무응답 방지)
             import asyncio
-            response = await asyncio.to_thread(
-                client.models.generate_content,
-                model=GEMINI_IMAGE_MODEL,
-                contents=content_parts,
-                config=types.GenerateContentConfig(
-                    response_modalities=["IMAGE", "TEXT"],
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model=GEMINI_IMAGE_MODEL,
+                    contents=content_parts,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE", "TEXT"],
+                    ),
                 ),
+                timeout=60.0,
             )
 
             # 응답에서 이미지 파트 추출
