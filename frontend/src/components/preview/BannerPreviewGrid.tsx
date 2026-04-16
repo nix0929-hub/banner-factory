@@ -112,11 +112,7 @@ export function BannerPreviewGrid() {
             AI가 최적의 배너 디자인을 만들고 있어요. 잠시만 기다려주세요.
           </p>
         </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '16px',
-        }}>
+        <div className="banner-grid">
           {[0, 1, 2].map((i) => (
             <SkeletonCard key={i} />
           ))}

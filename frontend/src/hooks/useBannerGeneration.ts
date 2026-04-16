@@ -45,12 +45,14 @@ export function useBannerGeneration() {
           setError(result.error ?? '배너 생성에 실패했습니다.')
           clearInterval(intervalRef.current!)
           intervalRef.current = null
+          setStep(4)  // 오류도 Step 4에서 에러 UI로 표시
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : '상태 확인 중 오류가 발생했습니다.'
         setError(message)
         clearInterval(intervalRef.current!)
         intervalRef.current = null
+        setStep(4)  // 폴링 오류도 Step 4에서 에러 UI로 표시
       }
     }, 2000)
   }
@@ -90,6 +92,7 @@ export function useBannerGeneration() {
       const message = err instanceof Error ? err.message : '배너 생성 요청에 실패했습니다.'
       setError(message)
       setJobStatus('failed')
+      setStep(4)  // API 요청 오류도 Step 4에서 에러 UI로 표시
     }
   }
 

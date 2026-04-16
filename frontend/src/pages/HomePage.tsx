@@ -163,7 +163,11 @@ export function HomePage() {
                 </p>
               </div>
               <button
-                onClick={reset}
+                onClick={() => {
+                  if (window.confirm('생성된 배너가 모두 삭제됩니다. 처음부터 다시 시작하시겠습니까?')) {
+                    reset()
+                  }
+                }}
                 style={{
                   ...navButtonBase,
                   backgroundColor: '#e9e5dd',

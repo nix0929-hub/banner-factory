@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent, type ChangeEvent } from 'react'
+import { useRef, useState, type DragEvent, type ChangeEvent, type KeyboardEvent } from 'react'
 
 interface ImageDropzoneProps {
   onFilesSelected: (files: File[]) => void
@@ -53,6 +53,14 @@ export function ImageDropzone({
     inputRef.current?.click()
   }
 
+  // 키보드 접근성: Enter/Space로 파일 선택 다이얼로그 열기
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClick()
+    }
+  }
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files ?? []).slice(0, maxFiles)
     if (selectedFiles.length > 0) {
@@ -64,7 +72,11 @@ export function ImageDropzone({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={label}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -78,7 +90,10 @@ export function ImageDropzone({
         backgroundColor: isDragging ? 'rgba(203, 183, 251, 0.05)' : 'transparent',
         transition: 'border-color 0.2s ease, background-color 0.2s ease',
         userSelect: 'none',
+        outline: 'none',
       }}
+      onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 2px #cbb7fb' }}
+      onBlur={(e) => { e.currentTarget.style.boxShadow = 'none' }}
     >
       <input
         ref={inputRef}

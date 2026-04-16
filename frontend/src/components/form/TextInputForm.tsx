@@ -67,11 +67,12 @@ export function TextInputForm() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Headline - Required */}
           <div>
-            <label style={labelStyle}>
+            <label htmlFor="banner-headline" style={labelStyle}>
               헤드라인
               <span style={{ color: '#cbb7fb', marginLeft: '4px' }}>*</span>
             </label>
             <input
+              id="banner-headline"
               type="text"
               value={textData.headline}
               onChange={(e) => updateTextData({ headline: e.target.value })}
@@ -84,11 +85,12 @@ export function TextInputForm() {
 
           {/* Subtext - Optional */}
           <div>
-            <label style={labelStyle}>
+            <label htmlFor="banner-subtext" style={labelStyle}>
               서브텍스트
               <span style={{ color: '#a09a94', marginLeft: '4px', fontWeight: '400' }}>(선택)</span>
             </label>
             <input
+              id="banner-subtext"
               type="text"
               value={textData.subtext}
               onChange={(e) => updateTextData({ subtext: e.target.value })}
@@ -101,11 +103,12 @@ export function TextInputForm() {
 
           {/* CTA - Optional */}
           <div>
-            <label style={labelStyle}>
+            <label htmlFor="banner-cta" style={labelStyle}>
               CTA 버튼 텍스트
               <span style={{ color: '#a09a94', marginLeft: '4px', fontWeight: '400' }}>(선택)</span>
             </label>
             <input
+              id="banner-cta"
               type="text"
               value={textData.cta}
               onChange={(e) => updateTextData({ cta: e.target.value })}
@@ -118,8 +121,9 @@ export function TextInputForm() {
 
           {/* Banner Size */}
           <div>
-            <label style={labelStyle}>배너 크기</label>
+            <label htmlFor="banner-size" style={labelStyle}>배너 크기</label>
             <select
+              id="banner-size"
               value={textData.bannerSize}
               onChange={(e) => updateTextData({ bannerSize: e.target.value })}
               style={{
@@ -146,6 +150,7 @@ export function TextInputForm() {
           <button
             type="submit"
             disabled={!canGenerate}
+            title={!textData.headline.trim() ? '헤드라인을 입력해주세요' : undefined}
             style={{
               padding: '13px 24px',
               borderRadius: '8px',
