@@ -7,7 +7,7 @@ const apiClient = axios.create({
 })
 
 export async function generateBanners(formData: FormData): Promise<BannerJobResponse> {
-  const response = await apiClient.post<BannerJobResponse>('/generate', formData, {
+  const response = await apiClient.post<BannerJobResponse>('/banner/generate', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -16,7 +16,7 @@ export async function generateBanners(formData: FormData): Promise<BannerJobResp
 }
 
 export async function pollJobStatus(jobId: string): Promise<BannerJobResponse> {
-  const response = await apiClient.get<BannerJobResponse>(`/jobs/${jobId}`)
+  const response = await apiClient.get<BannerJobResponse>(`/banner/status/${jobId}`)
   return response.data
 }
 
@@ -25,7 +25,7 @@ export function downloadBanner(
   variantId: string,
   format: 'png' | 'jpg'
 ): void {
-  const url = `/api/download/${jobId}/${variantId}?format=${format}`
+  const url = `/api/banner/download/${jobId}/${variantId}?format=${format}`
   const link = document.createElement('a')
   link.href = url
   link.download = `banner_${variantId}.${format}`

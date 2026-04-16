@@ -29,7 +29,7 @@ const initialTextData: TextData = {
   headline: '',
   subtext: '',
   cta: '',
-  bannerSize: '1200x628',
+  bannerSize: 'og_image',
 }
 
 export const useBannerStore = create<BannerState>((set) => ({

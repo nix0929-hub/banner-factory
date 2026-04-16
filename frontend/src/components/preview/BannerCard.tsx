@@ -1,4 +1,5 @@
 import type { BannerVariant } from '../../types/banner'
+import { VARIANT_LABELS } from '../../types/banner'
 import { downloadBanner } from '../../services/api'
 import { useBannerStore } from '../../store/bannerStore'
 
@@ -29,6 +30,8 @@ export function BannerCard({ variant }: BannerCardProps) {
     downloadBanner(jobId, variant.variant_id, format)
   }
 
+  const label = VARIANT_LABELS[variant.variant_id] ?? variant.variant_id
+
   return (
     <div style={{
       backgroundColor: '#ffffff',
@@ -49,7 +52,7 @@ export function BannerCard({ variant }: BannerCardProps) {
           fontWeight: '600',
           color: '#292827',
         }}>
-          {variant.label}
+          {label}
         </span>
         <span style={{
           fontSize: '11px',
@@ -58,8 +61,12 @@ export function BannerCard({ variant }: BannerCardProps) {
           padding: '2px 8px',
           borderRadius: '8px',
           border: '1px solid #dcd7d3',
+          maxWidth: '140px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}>
-          {variant.width} × {variant.height}
+          {variant.style_summary}
         </span>
       </div>
 
@@ -74,7 +81,7 @@ export function BannerCard({ variant }: BannerCardProps) {
       }}>
         <img
           src={`data:image/png;base64,${variant.image_base64}`}
-          alt={variant.label}
+          alt={label}
           style={{
             maxWidth: '100%',
             maxHeight: '200px',
