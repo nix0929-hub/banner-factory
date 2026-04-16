@@ -147,14 +147,29 @@ export function BannerPreviewGrid() {
   }
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '16px',
-    }}>
-      {banners.map((variant) => (
-        <BannerCard key={variant.variant_id} variant={variant} />
-      ))}
-    </div>
+    <>
+      <div className="banner-grid">
+        {banners.map((variant) => (
+          <BannerCard key={variant.variant_id} variant={variant} />
+        ))}
+      </div>
+      <style>{`
+        .banner-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 640px) {
+          .banner-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .banner-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      `}</style>
+    </>
   )
 }

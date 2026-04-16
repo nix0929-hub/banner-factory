@@ -53,9 +53,9 @@ export function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f7f5f2' }}>
-      {/* Hero Section */}
+      {/* Hero Section — Superhuman: deep purple gradient, cinematic curtain effect */}
       <div style={{
-        backgroundColor: '#1b1938',
+        background: 'linear-gradient(160deg, #0f0d22 0%, #1b1938 45%, #231e42 100%)',
         padding: '48px 24px 40px',
         textAlign: 'center',
       }}>
@@ -65,7 +65,7 @@ export function HomePage() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '20px',
+            marginBottom: '24px',
           }}>
             <div style={{
               width: '32px',
@@ -84,7 +84,7 @@ export function HomePage() {
             </div>
             <span style={{
               fontSize: '18px',
-              fontWeight: '700',
+              fontWeight: '600',
               color: 'rgba(255, 255, 255, 0.95)',
               letterSpacing: '-0.02em',
             }}>
@@ -92,34 +92,37 @@ export function HomePage() {
             </span>
           </div>
 
+          {/* Hero heading — Superhuman: line-height 0.96, weight 540 feel */}
           <h1 style={{
-            fontSize: '42px',
+            fontSize: '44px',
             fontWeight: '700',
             color: 'rgba(255, 255, 255, 0.95)',
-            lineHeight: '1.0',
+            lineHeight: '0.96',
             letterSpacing: '-0.03em',
-            marginBottom: '12px',
+            marginBottom: '16px',
           }}>
             AI로 배너를 <br />
             <span style={{ color: '#cbb7fb' }}>즉시 제작</span>하세요
           </h1>
 
+          {/* Subheading — Misted White (80%) per Superhuman spec */}
           <p style={{
             fontSize: '16px',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'rgba(255, 255, 255, 0.8)',
             lineHeight: '1.5',
             marginBottom: '32px',
+            letterSpacing: '0px',
           }}>
             레퍼런스 이미지와 제품 사진만 있으면 <br />
             전문가 수준의 배너를 3가지 버전으로 생성해 드립니다.
           </p>
 
-          {/* Step Indicator */}
+          {/* Step Indicator — hero surface: semi-transparent white border */}
           <div style={{
             backgroundColor: 'rgba(255, 255, 255, 0.06)',
             borderRadius: '16px',
             padding: '20px 24px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
           }}>
             <StepIndicator currentStep={currentStep} />
           </div>
@@ -130,7 +133,7 @@ export function HomePage() {
       <div style={{
         maxWidth: '720px',
         margin: '0 auto',
-        padding: '32px 24px 48px',
+        padding: '32px 24px 64px',
       }}>
         {/* Step Content */}
         {currentStep === 1 && <ReferenceUploader />}
@@ -146,15 +149,16 @@ export function HomePage() {
             }}>
               <div>
                 <h2 style={{
-                  fontSize: '18px',
+                  fontSize: '20px',
                   fontWeight: '600',
                   color: '#292827',
-                  lineHeight: '1.0',
-                  marginBottom: '4px',
+                  lineHeight: '0.96',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '6px',
                 }}>
                   생성된 배너
                 </h2>
-                <p style={{ fontSize: '13px', color: '#a09a94' }}>
+                <p style={{ fontSize: '13px', color: '#a09a94', lineHeight: '1.5' }}>
                   3가지 버전으로 제작된 배너를 확인하세요.
                 </p>
               </div>
@@ -212,15 +216,17 @@ export function HomePage() {
                 disabled={!canGoNext()}
                 style={{
                   ...navButtonBase,
-                  backgroundColor: canGoNext() ? '#e9e5dd' : '#f0ede8',
-                  color: canGoNext() ? '#292827' : '#a09a94',
+                  /* Dark Primary (enabled) vs muted (disabled) — Superhuman action button */
+                  backgroundColor: canGoNext() ? '#292827' : '#f0ede8',
+                  color: canGoNext() ? '#ffffff' : '#a09a94',
+                  border: canGoNext() ? '1px solid #292827' : '1px solid #dcd7d3',
                   cursor: canGoNext() ? 'pointer' : 'not-allowed',
                 }}
                 onMouseOver={(e) => {
-                  if (canGoNext()) (e.target as HTMLButtonElement).style.backgroundColor = '#dcd7d3'
+                  if (canGoNext()) (e.target as HTMLButtonElement).style.backgroundColor = '#3d3a38'
                 }}
                 onMouseOut={(e) => {
-                  if (canGoNext()) (e.target as HTMLButtonElement).style.backgroundColor = '#e9e5dd'
+                  if (canGoNext()) (e.target as HTMLButtonElement).style.backgroundColor = '#292827'
                 }}
               >
                 다음

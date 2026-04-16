@@ -142,27 +142,35 @@ export function TextInputForm() {
             </select>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button — Superhuman Dark Primary on active, muted on disabled */}
           <button
             type="submit"
             disabled={!canGenerate}
             style={{
-              padding: '12px 24px',
+              padding: '13px 24px',
               borderRadius: '8px',
-              border: 'none',
-              backgroundColor: canGenerate ? '#e9e5dd' : '#f0ede8',
-              color: canGenerate ? '#292827' : '#a09a94',
+              border: '1px solid',
+              borderColor: canGenerate ? '#292827' : '#dcd7d3',
+              backgroundColor: canGenerate ? '#292827' : '#f0ede8',
+              color: canGenerate ? '#ffffff' : '#a09a94',
               fontSize: '14px',
               fontWeight: '600',
               cursor: canGenerate ? 'pointer' : 'not-allowed',
-              transition: 'background-color 0.15s ease, color 0.15s ease',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease',
               letterSpacing: '0.01em',
+              width: '100%',
+            }}
+            onMouseOver={(e) => {
+              if (canGenerate) (e.target as HTMLButtonElement).style.backgroundColor = '#3d3a38'
+            }}
+            onMouseOut={(e) => {
+              if (canGenerate) (e.target as HTMLButtonElement).style.backgroundColor = '#292827'
             }}
           >
             {isGenerating ? (
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
-                  <circle cx="8" cy="8" r="6" stroke="#a09a94" strokeWidth="2" strokeDasharray="28" strokeDashoffset="10" />
+                  <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeDasharray="28" strokeDashoffset="10" />
                 </svg>
                 배너 생성 중...
               </span>
