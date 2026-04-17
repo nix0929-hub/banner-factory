@@ -38,7 +38,7 @@ VARIANT_CONFIGS: Dict[str, Dict[str, Any]] = {
 }
 
 # Gemini 이미지 생성 모델명
-GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image-preview"  # API 실존 확인됨 (2026-04)
+GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image-preview"
 
 
 def _build_prompt(
@@ -92,6 +92,15 @@ def _build_prompt(
     subtext = text_data.get("subtext", "")
     cta = text_data.get("cta", "")
 
+    # f-string 안에서 백슬래시 사용 불가(Python <3.12) — 미리 조립
+    subtext_line = ('- Subtext: "' + subtext + '"') if subtext else ""
+    subtext_style = "  * Style: regular weight, smaller than headline" if subtext else ""
+    subtext_color = ("  * Color: " + colors.get("secondary", "#666666")) if subtext else ""
+    cta_line = ('- CTA button: "' + cta + '"') if cta else ""
+    cta_bg = ("  * Background: " + colors.get("primary", "#1A1A1A")) if cta else ""
+    cta_fg = ("  * Text color: " + colors.get("background", "#FFFFFF")) if cta else ""
+    cta_style = "  * Rounded corners, prominent placement" if cta else ""
+
     # 배경 타입 설명
     bg_type = background.get("type", "solid")
     if bg_type == "gradient" and background.get("gradient_start") and background.get("gradient_end"):
@@ -138,13 +147,13 @@ TEXT CONTENT (render exactly as provided, Korean text must be rendered correctly
   * Color: {text_color}
   * Alignment: {typography.get('text_alignment', 'left')}
   * Font size: large, prominent
-{"- Subtext: \"" + subtext + "\"" if subtext else ""}
-  {"* Style: regular weight, smaller than headline" if subtext else ""}
-  {"* Color: " + colors.get("secondary", "#666666") if subtext else ""}
-{"- CTA button: \"" + cta + "\"" if cta else ""}
-  {"* Background: " + colors.get("primary", "#1A1A1A") if cta else ""}
-  {"* Text color: " + colors.get("background", "#FFFFFF") if cta else ""}
-  {"* Rounded corners, prominent placement" if cta else ""}
+{subtext_line}
+{subtext_style}
+{subtext_color}
+{cta_line}
+{cta_bg}
+{cta_fg}
+{cta_style}
 
 STYLE:
 - Keywords: {style_str}
@@ -218,20 +227,29 @@ async def generate_banner_variants(
                 content_parts.append(part)
                 logger.debug("제품 이미지 %d 첨부 (크기: %d bytes)", i + 1, len(img_bytes))
 
-            # Gemini 이미지 생성 API 호출 (동기 → asyncio.to_thread로 이벤트 루프 블로킹 방지)
-            # asyncio.wait_for로 60초 타임아웃 설정 (무응답 방지)
+            # Gemini 이미지 생성 API 호출 — 최대 2회 시도 (타임아웃 재시도)
             import asyncio
-            response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    client.models.generate_content,
-                    model=GEMINI_IMAGE_MODEL,
-                    contents=content_parts,
-                    config=types.GenerateContentConfig(
-                        response_modalities=["IMAGE", "TEXT"],
-                    ),
-                ),
-                timeout=60.0,
-            )
+            response = None
+            last_exc: Optional[Exception] = None
+            for attempt in range(2):
+                try:
+                    response = await asyncio.wait_for(
+                        asyncio.to_thread(
+                            client.models.generate_content,
+                            model=GEMINI_IMAGE_MODEL,
+                            contents=content_parts,
+                            config=types.GenerateContentConfig(
+                                response_modalities=["IMAGE", "TEXT"],
+                            ),
+                        ),
+                        timeout=180.0,
+                    )
+                    break
+                except asyncio.TimeoutError as exc:
+                    last_exc = exc
+                    logger.warning("variant '%s' 시도 %d 타임아웃, 재시도...", variant_id, attempt + 1)
+            if response is None:
+                raise last_exc  # type: ignore[misc]
 
             # 응답에서 이미지 파트 추출
             image_bytes_result: Optional[bytes] = None

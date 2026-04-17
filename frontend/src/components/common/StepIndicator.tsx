@@ -4,98 +4,114 @@ interface StepIndicatorProps {
   currentStep: AppStep
 }
 
-const STEPS: { step: AppStep; label: string }[] = [
-  { step: 1, label: '레퍼런스' },
-  { step: 2, label: '제품이미지' },
-  { step: 3, label: '텍스트' },
-  { step: 4, label: '결과' },
+const STEPS: { step: AppStep; label: string; desc: string }[] = [
+  { step: 1, label: '레퍼런스', desc: '스타일 이미지' },
+  { step: 2, label: '제품 이미지', desc: '배경 제거' },
+  { step: 3, label: '텍스트', desc: '헤드라인 입력' },
+  { step: 4, label: '결과', desc: '3종 배너' },
 ]
+
+const C = {
+  accent: '#1ed760',
+  textPrimary: '#ffffff',
+  textSecondary: '#b3b3b3',
+  surface: '#181818',
+  interactive: '#1f1f1f',
+  border: '#4d4d4d',
+}
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0',
-    }}>
-      {STEPS.map(({ step, label }, index) => {
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      {STEPS.map(({ step, label, desc }, index) => {
         const isCompleted = currentStep > step
         const isCurrent = currentStep === step
 
         return (
-          <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '6px',
-            }}>
-              {/* Circle */}
+          <div key={step} style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+              aria-current={isCurrent ? 'step' : undefined}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                backgroundColor: isCurrent ? C.surface : 'transparent',
+                transition: 'background-color 0.15s ease',
+              }}
+            >
+              {/* Circle indicator */}
               <div style={{
-                width: '28px',
-                height: '28px',
+                width: '24px',
+                height: '24px',
                 borderRadius: '50%',
+                flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '12px',
-                fontWeight: '600',
+                fontSize: '11px',
+                fontWeight: '700',
                 transition: 'all 0.2s ease',
                 backgroundColor: isCompleted
-                  ? '#cbb7fb'
+                  ? C.accent
                   : isCurrent
                   ? 'transparent'
                   : 'transparent',
                 border: isCompleted
-                  ? '2px solid #cbb7fb'
+                  ? `2px solid ${C.accent}`
                   : isCurrent
-                  ? '2px solid #292827'
-                  : '2px solid #dcd7d3',
+                  ? `2px solid ${C.textPrimary}`
+                  : `2px solid ${C.border}`,
                 color: isCompleted
-                  ? '#ffffff'
+                  ? '#000000'
                   : isCurrent
-                  ? '#292827'
-                  : '#a09a94',
+                  ? C.textPrimary
+                  : C.textSecondary,
               }}>
                 {isCompleted ? (
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path
-                      d="M2 6l3 3 5-5"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ) : (
                   step
                 )}
               </div>
-              {/* Label */}
-              <span style={{
-                fontSize: '11px',
-                fontWeight: isCurrent ? '600' : '400',
-                color: isCompleted
-                  ? '#cbb7fb'
-                  : isCurrent
-                  ? '#292827'
-                  : '#a09a94',
-                letterSpacing: '0.02em',
-                transition: 'color 0.2s ease',
-              }}>
-                {label}
-              </span>
+
+              {/* Labels */}
+              <div>
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: isCurrent ? '700' : '400',
+                  color: isCompleted
+                    ? C.accent
+                    : isCurrent
+                    ? C.textPrimary
+                    : C.textSecondary,
+                  lineHeight: '1.2',
+                  transition: 'color 0.2s ease',
+                }}>
+                  {label}
+                </div>
+                <div style={{
+                  fontSize: '11px',
+                  color: C.border,
+                  marginTop: '2px',
+                }}>
+                  {desc}
+                </div>
+              </div>
             </div>
 
-            {/* Connector line */}
+            {/* Vertical connector */}
             {index < STEPS.length - 1 && (
               <div style={{
-                width: '48px',
-                height: '2px',
-                backgroundColor: currentStep > step ? '#cbb7fb' : '#dcd7d3',
-                marginBottom: '18px',
+                width: '2px',
+                height: '12px',
+                backgroundColor: currentStep > step ? C.accent : C.border,
+                marginLeft: '23px',
                 transition: 'background-color 0.2s ease',
+                opacity: 0.5,
               }} />
             )}
           </div>

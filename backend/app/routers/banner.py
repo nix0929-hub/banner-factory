@@ -9,6 +9,7 @@ import io
 from typing import List, Literal
 from uuid import uuid4
 
+from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
@@ -31,7 +32,7 @@ MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 ALLOWED_FORMATS: set[str] = {"png", "jpg", "jpeg"}
 
 
-def _validate_image_upload(file_bytes: bytes, filename: str, content_type: str | None) -> None:
+def _validate_image_upload(file_bytes: bytes, filename: str, content_type: Optional[str]) -> None:
     """업로드 이미지 크기 및 MIME 타입 검증."""
     if len(file_bytes) > MAX_FILE_SIZE_BYTES:
         raise HTTPException(
@@ -145,7 +146,7 @@ async def download_banner(
         raise HTTPException(status_code=404, detail="생성된 배너가 없습니다.")
 
     # variant_id로 해당 배너 변형 탐색
-    variant: BannerVariant | None = next(
+    variant: Optional[BannerVariant] = next(
         (b for b in job.banners if b.variant_id == variant_id), None
     )
     if variant is None:

@@ -3,65 +3,57 @@ import { VARIANT_LABELS } from '../../types/banner'
 import { downloadBanner } from '../../services/api'
 import { useBannerStore } from '../../store/bannerStore'
 
+const C = {
+  surface: '#181818',
+  interactive: '#1f1f1f',
+  border: '#4d4d4d',
+  textPrimary: '#ffffff',
+  textSecondary: '#b3b3b3',
+  accent: '#1ed760',
+}
+
 interface BannerCardProps {
   variant: BannerVariant
 }
 
-const downloadButtonStyle: React.CSSProperties = {
-  flex: 1,
-  padding: '8px 12px',
-  borderRadius: '8px',
-  border: '1px solid #dcd7d3',
-  backgroundColor: '#e9e5dd',
-  color: '#292827',
-  fontSize: '12px',
-  fontWeight: '500',
-  cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
-  fontFamily: 'inherit',
-  letterSpacing: '0.01em',
-}
-
 export function BannerCard({ variant }: BannerCardProps) {
   const { jobId } = useBannerStore()
+  const label = VARIANT_LABELS[variant.variant_id] ?? variant.variant_id
 
   const handleDownload = (format: 'png' | 'jpg') => {
     if (!jobId) return
     downloadBanner(jobId, variant.variant_id, format)
   }
 
-  const label = VARIANT_LABELS[variant.variant_id] ?? variant.variant_id
-
   return (
     <div style={{
-      backgroundColor: '#ffffff',
-      border: '1px solid #dcd7d3',
-      borderRadius: '16px',
+      backgroundColor: C.surface,
+      border: `1px solid ${C.border}`,
+      borderRadius: '12px',
       overflow: 'hidden',
-    }}>
-      {/* Variant Label */}
+      transition: 'border-color 0.15s ease',
+    }}
+      onMouseOver={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#7c7c7c' }}
+      onMouseOut={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = C.border }}
+    >
+      {/* Header */}
       <div style={{
         padding: '12px 16px',
-        borderBottom: '1px solid #dcd7d3',
+        borderBottom: `1px solid ${C.border}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
-        <span style={{
-          fontSize: '13px',
-          fontWeight: '600',
-          color: '#292827',
-        }}>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: C.textPrimary }}>
           {label}
         </span>
         <span style={{
           fontSize: '11px',
-          color: '#a09a94',
-          backgroundColor: '#f7f5f2',
-          padding: '2px 8px',
-          borderRadius: '8px',
-          border: '1px solid #dcd7d3',
-          maxWidth: '140px',
+          color: C.textSecondary,
+          backgroundColor: C.interactive,
+          padding: '3px 10px',
+          borderRadius: '9999px',
+          maxWidth: '150px',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -72,21 +64,21 @@ export function BannerCard({ variant }: BannerCardProps) {
 
       {/* Image */}
       <div style={{
-        backgroundColor: '#f7f5f2',
+        backgroundColor: C.interactive,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
-        minHeight: '160px',
+        padding: '20px',
+        minHeight: '180px',
       }}>
         <img
           src={`data:image/png;base64,${variant.image_base64}`}
           alt={label}
           style={{
             maxWidth: '100%',
-            maxHeight: '200px',
+            maxHeight: '220px',
             objectFit: 'contain',
-            borderRadius: '8px',
+            borderRadius: '6px',
           }}
         />
       </div>
@@ -94,26 +86,41 @@ export function BannerCard({ variant }: BannerCardProps) {
       {/* Download Buttons */}
       <div style={{
         padding: '12px 16px',
-        borderTop: '1px solid #dcd7d3',
+        borderTop: `1px solid ${C.border}`,
         display: 'flex',
         gap: '8px',
       }}>
-        <button
-          onClick={() => handleDownload('png')}
-          style={downloadButtonStyle}
-          onMouseOver={(e) => { (e.target as HTMLButtonElement).style.backgroundColor = '#dcd7d3' }}
-          onMouseOut={(e) => { (e.target as HTMLButtonElement).style.backgroundColor = '#e9e5dd' }}
-        >
-          PNG 다운로드
-        </button>
-        <button
-          onClick={() => handleDownload('jpg')}
-          style={downloadButtonStyle}
-          onMouseOver={(e) => { (e.target as HTMLButtonElement).style.backgroundColor = '#dcd7d3' }}
-          onMouseOut={(e) => { (e.target as HTMLButtonElement).style.backgroundColor = '#e9e5dd' }}
-        >
-          JPG 다운로드
-        </button>
+        {(['png', 'jpg'] as const).map((fmt) => (
+          <button
+            key={fmt}
+            onClick={() => handleDownload(fmt)}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              borderRadius: '9999px',
+              border: `1px solid ${C.border}`,
+              backgroundColor: 'transparent',
+              color: C.textSecondary,
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: 'border-color 0.15s ease, color 0.15s ease',
+              fontFamily: 'inherit',
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = C.accent
+              ;(e.currentTarget as HTMLButtonElement).style.color = C.accent
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = C.border
+              ;(e.currentTarget as HTMLButtonElement).style.color = C.textSecondary
+            }}
+          >
+            {fmt.toUpperCase()}
+          </button>
+        ))}
       </div>
     </div>
   )

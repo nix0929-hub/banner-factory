@@ -45,13 +45,14 @@ app = FastAPI(
 )
 
 # CORS 미들웨어 등록
-# Vite 프록시는 개발 전용이므로 FastAPI 자체에도 CORS 허용 설정이 필요하다.
+# ALLOWED_ORIGINS 환경변수로 추가 도메인 설정 가능 (쉼표 구분)
+_default_origins = ["http://localhost:5173", "http://localhost:3000"]
+_extra = os.environ.get("ALLOWED_ORIGINS", "")
+_allowed_origins = _default_origins + [o.strip() for o in _extra.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vite 개발 서버
-        "http://localhost:3000",  # 기타 개발 서버
-    ],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

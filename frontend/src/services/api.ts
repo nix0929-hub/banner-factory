@@ -1,8 +1,10 @@
 import axios from 'axios'
 import type { BannerJobResponse } from '../types/banner'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
+
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   timeout: 30000,
 })
 
@@ -25,7 +27,7 @@ export function downloadBanner(
   variantId: string,
   format: 'png' | 'jpg'
 ): void {
-  const url = `/api/banner/download/${jobId}/${variantId}?format=${format}`
+  const url = `${API_BASE}/banner/download/${jobId}/${variantId}?format=${format}`
   const link = document.createElement('a')
   link.href = url
   link.download = `banner_${variantId}.${format}`
