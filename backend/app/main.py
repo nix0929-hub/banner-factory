@@ -16,6 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.job_store import job_store
 from app.routers import banner, health
 
 
@@ -23,17 +24,19 @@ from app.routers import banner, health
 async def lifespan(app: FastAPI):
     """
     서버 시작/종료 이벤트 처리.
-    startup: temp 디렉토리가 없으면 생성한다.
+    startup: temp 디렉토리 생성, Redis 연결 초기화.
+    shutdown: Redis 연결 종료.
     """
     # --- startup ---
     temp_dir = settings.TEMP_DIR
     os.makedirs(temp_dir, exist_ok=True)
     print(f"[startup] temp 디렉토리 확인/생성 완료: {temp_dir}")
+    await job_store.startup(settings.REDIS_URL or None)
 
     yield  # 애플리케이션 실행
 
     # --- shutdown ---
-    # 필요 시 temp 파일 정리 로직 추가
+    await job_store.shutdown()
 
 
 # FastAPI 인스턴스 생성

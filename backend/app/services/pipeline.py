@@ -14,6 +14,7 @@ import logging
 from typing import Dict, List
 
 from app.config import settings
+from app.job_store import job_store
 from app.models.request import BANNER_SIZES
 from app.models.response import BannerJobResponse, BannerVariant, JobStatus
 from app.services.ai.background_remover import remove_backgrounds_batch
@@ -29,7 +30,6 @@ async def run_pipeline(
     product_bytes_list: List[bytes],
     text_data: Dict[str, str],
     banner_size: str,
-    job_store: Dict[str, BannerJobResponse],
 ) -> None:
     """
     배너 생성 전체 파이프라인을 실행하고 결과를 job_store에 저장한다.
@@ -40,12 +40,11 @@ async def run_pipeline(
         product_bytes_list: 제품 이미지 bytes 리스트 (최대 3개)
         text_data: {"headline": str, "subtext": str, "cta": str}
         banner_size: BANNER_SIZES의 키 (예: "og_image")
-        job_store: BannerJobResponse를 저장하는 인메모리 dict (라우터에서 주입)
     """
     logger.info("파이프라인 시작: job_id=%s", job_id)
 
     # 작업 상태를 processing으로 업데이트
-    job_store[job_id] = BannerJobResponse(job_id=job_id, status=JobStatus.processing)
+    await job_store.set(job_id, BannerJobResponse(job_id=job_id, status=JobStatus.processing))
 
     try:
         # ──────────────────────────────────────────────────
@@ -121,11 +120,11 @@ async def run_pipeline(
         if not banner_variants:
             raise RuntimeError("생성된 배너가 없습니다. 모든 variant 생성에 실패했습니다.")
 
-        job_store[job_id] = BannerJobResponse(
+        await job_store.set(job_id, BannerJobResponse(
             job_id=job_id,
             status=JobStatus.completed,
             banners=banner_variants,
-        )
+        ))
         logger.info(
             "파이프라인 완료: job_id=%s, 배너 %d개 생성",
             job_id,
@@ -137,8 +136,8 @@ async def run_pipeline(
         error_message = str(e)
         logger.error("파이프라인 실패: job_id=%s, 오류=%s", job_id, error_message, exc_info=True)
 
-        job_store[job_id] = BannerJobResponse(
+        await job_store.set(job_id, BannerJobResponse(
             job_id=job_id,
             status=JobStatus.failed,
             error=error_message,
-        )
+        ))

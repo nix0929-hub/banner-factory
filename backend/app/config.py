@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # 임시 파일 보관 시간 (시간 단위)
     TEMP_FILE_TTL_HOURS: int = 1
 
+    # Redis URL (미설정 시 인메모리 폴백)
+    REDIS_URL: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

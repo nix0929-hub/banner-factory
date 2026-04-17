@@ -13,14 +13,11 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
+from app.job_store import job_store
 from app.models.response import BannerJobResponse, BannerVariant, JobStatus
 from app.services.pipeline import run_pipeline
 
 router = APIRouter()
-
-# 인메모리 작업 저장소 — job_id(str) → BannerJobResponse
-# uvicorn --workers 1 전제: 멀티프로세스 환경에서는 Redis 등으로 교체 필요
-job_store: dict[str, BannerJobResponse] = {}
 
 # 제품 이미지 최대 업로드 수
 MAX_PRODUCT_IMAGES = 3
@@ -86,7 +83,8 @@ async def generate_banner(
 
     # 새 작업 ID 생성 및 job_store 초기화
     job_id = str(uuid4())
-    job_store[job_id] = BannerJobResponse(job_id=job_id, status=JobStatus.pending)
+    initial_job = BannerJobResponse(job_id=job_id, status=JobStatus.pending)
+    await job_store.set(job_id, initial_job)
 
     # 파이프라인을 백그라운드 태스크로 등록
     background_tasks.add_task(
@@ -96,10 +94,9 @@ async def generate_banner(
         product_bytes_list,
         text_data,
         banner_size,
-        job_store,
     )
 
-    return job_store[job_id]
+    return initial_job
 
 
 @router.get("/banner/status/{job_id}", response_model=BannerJobResponse)
@@ -108,7 +105,7 @@ async def get_banner_status(job_id: str) -> BannerJobResponse:
     job_id로 작업 상태를 조회한다.
     존재하지 않는 job_id이면 404를 반환한다.
     """
-    job = job_store.get(job_id)
+    job = await job_store.get(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail=f"job_id '{job_id}'를 찾을 수 없습니다.")
     return job
@@ -132,7 +129,7 @@ async def download_banner(
             detail=f"지원하지 않는 포맷입니다: '{format}'. 허용: {sorted(ALLOWED_FORMATS)}",
         )
 
-    job = job_store.get(job_id)
+    job = await job_store.get(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail=f"job_id '{job_id}'를 찾을 수 없습니다.")
 
